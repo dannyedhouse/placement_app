@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.placementapplication">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Placement Application"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:usesCleartextTraffic="true"
+        android:supportsRtl="true"
+        android:theme="@style/AlertDialog.AppCompat.Light">
+        <activity
+            android:name="com.example.placementapplication.AccountCreationActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+        <activity
+            android:name="com.example.placementapplication.LoginActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.example.placementapplication.MainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
+        <activity
+            android:name="com.example.placementapplication.FavoritesActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.example.placementapplication.MainActivity"
+            android:theme="@style/AppTheme.FullScreen" />
+        <activity
+            android:name="com.example.placementapplication.Search"
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.example.placementapplication.MainActivity"
+            android:theme="@style/AppTheme.FullScreen" />
+        <activity
+            android:name="com.example.placementapplication.PrefrencesActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.example.placementapplication.MainActivity"
+            android:theme="@style/AppTheme.FullScreen" />
+        <activity
+            android:name="com.example.placementapplication.ProfileActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName="com.example.placementapplication.MainActivity"
+            android:theme="@style/AppTheme.FullScreen" />
+        <activity
+            android:name="com.example.placementapplication.SearchResults"
+            android:launchMode="singleTop"
+            android:parentActivityName="com.example.placementapplication.Search"
+            android:theme="@style/AppTheme.FullScreen" />
+        <activity
+            android:name="com.example.placementapplication.PlacementDescription"
+            android:theme="@style/AppTheme.FullScreen"/>
+    </application>
+
+</manifest>
