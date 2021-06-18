@@ -10,7 +10,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,8 +23,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Fields for Placement Table
     private Context context;
     private static String DATABASE_NAME = "placements.db";
-    private static String TABLE_NAME = "placementTable";
-    private static String ID_COL = "PlacementID"; //PrimaryKey
+    private static String PLACEMENT_TABLE = "placementTable";
+    private static String PLACEMENT_ID = "PlacementID"; //PrimaryKey
     private static String PLACEMENT_NAME = "PlacementName";
     private static String COMPANY_NAME = "Company";
     private static String CLOSING_DATE = "Deadline";
@@ -42,7 +41,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //Fields for Profile table
     private static String PROFILE_TABLE = "profileTable";
-    private static String ID_COL2 = "UserID"; //PrimaryKey
+    private static String PROFILE_ID = "UserID"; //PrimaryKey
     private static String USERNAME = "Username";
     private static String NAME = "Name";
     private static String EMAIL = "Email";
@@ -52,18 +51,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static String ABOUT = "About";
     private static String EXPERIENCE = "Experience";
     private static String UNIVERSITY = "University";
-    private static String SYNC_2 = "Sync";
 
     // Query to create the Placement Table
-    private static final String QUERY = "CREATE TABLE " + TABLE_NAME + " (" + ID_COL + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+    private static final String QUERY = "CREATE TABLE " + PLACEMENT_TABLE + "(" + PLACEMENT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             PLACEMENT_NAME + " TEXT, " + COMPANY_NAME + " TEXT, " + CLOSING_DATE + " TEXT, " + PLACEMENT_TYPE
             + " TEXT, " + SALARY + " TEXT, " + LOCATION + " TEXT, " + DESCRIPTION + " TEXT, " + SUBJECT + " TEXT, " +
             MILES + " INTEGER, " + PAID + " TEXT, " + URL + " TEXT, " + SYNC + " INTEGER)";
 
     // Create Profile Table
-    private static final String profileQuery = "CREATE TABLE " + PROFILE_TABLE + " (" + ID_COL2 + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+    private static final String profileQuery = "CREATE TABLE " + PROFILE_TABLE + " (" + PROFILE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             USERNAME + " TEXT," + NAME + "  TEXT, " + EMAIL + " TEXT, " + PHONE + " INTEGER, " + DOB + " DATE, " + ADDRESS + " TEXT, " + ABOUT + " TEXT, " + EXPERIENCE + " TEXT, " + UNIVERSITY + " TEXT, " +
-            SYNC_2 + " INTEGER)";
+            SYNC + " INTEGER)";
 
     // Create Favorites Table
     private static String FAVORITES_TABLES = "userFavTable";
@@ -71,10 +69,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             "UserID INTEGER, PlacementID INTEGER, Sync INTEGER, FOREIGN KEY(UserID) REFERENCES ProfileTable(UserID), FOREIGN KEY(PlacementID) " +
             "REFERENCES PlacementTable(PlacementID))";
 
+    // Create Preferences Table
     private static String PREFERENCES_TABLE = "preferencesTable";
     private static final String preferencesQuery = "CREATE TABLE " + PREFERENCES_TABLE + " (PrefID INTEGER PRIMARY KEY AUTOINCREMENT," +
             "UserID INTEGER UNIQUE, Paid TEXT, Type TEXT, Subject TEXT, Miles INTEGER, Relocate BOOLEAN, Sync INTEGER, FOREIGN KEY(UserID) REFERENCES ProfileTable(UserID))";
-
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -97,6 +95,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void addPreferences(String paid, String type, String subject, int miles, boolean relocate) {
+        /**
+         * Adds/updates the user preferences
+         */
         SQLiteDatabase db = this.getWritableDatabase();
         int relocateInt = 0;
 
@@ -107,7 +108,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int userID = this.getUserID();
 
         String query = "UPDATE " + PREFERENCES_TABLE + " SET UserID = " + userID + ", Paid = '" + paid + "', Type ='" + type +
-                "', Subject='" + subject + "', Miles=" + miles + ", Relocate=" + relocateInt + ", Sync =0 WHERE UserID = " + userID + ";";
+                "', Subject='" + subject + "', Miles=" + miles + ", Relocate=" + relocateInt + ", Sync=0 WHERE UserID = " + userID + ";";
         String update = "INSERT OR IGNORE INTO " + PREFERENCES_TABLE + " (UserID, Paid, Type, Subject, Miles, Relocate, Sync) VALUES (" + userID + ", '"
                 + paid + "', '" + type + "', '" + subject + "', " + miles + ", " + relocateInt + ", 0)";
 
@@ -116,6 +117,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void addPlacement(Context context, SQLiteDatabase db) {
+        /**
+         * Add each placement stored in the CSV file to the local SQLite database
+         */
         String csvFile = "placements.csv"; // Read the placements from this CSV file (Saved in... app>src>main>assets)
         AssetManager manager = context.getAssets();
         InputStream stream = null;
@@ -143,7 +147,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     contentValues.put(PAID, line[9].trim());
                     contentValues.put(URL, line[10].trim());
                     contentValues.put(SYNC, 0);
-                    db.insert(TABLE_NAME, null, contentValues);
+                    db.insert(PLACEMENT_TABLE, null, contentValues);
                 }
 
             } catch (IOException e) {
@@ -159,8 +163,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) { // Dont create table if already made
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        /**
+         * Do not create table if already made
+          */
+        db.execSQL("DROP TABLE IF EXISTS " + PLACEMENT_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + PROFILE_TABLE);
         onCreate(db);
     }
@@ -172,12 +179,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Cursor getPreferences() {
         int userID = this.getUserID();
         SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT *, PrefID as _id FROM " + PREFERENCES_TABLE+" WHERE UserID = " + userID + ";";
+        String query = "SELECT *, PrefID as _id FROM " + PREFERENCES_TABLE + " WHERE UserID = " + userID + ";";
         Cursor data = db.rawQuery(query, null);
         return data;
     }
 
-    public Cursor getData(String keyword) { // Returns the placements using Cursor
+    public Cursor getData(String keyword) {
+        /**
+         * Returns the placements using Cursor (returns all if no user preferences are set)
+          */
         this.keyword = keyword;
         SQLiteDatabase db = getWritableDatabase();
 
@@ -185,7 +195,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor preferences = getPreferences();
 
         if (preferences.getCount() == 0) {
-            String query = "SELECT *, PlacementID as _id FROM " + TABLE_NAME + " WHERE " + PLACEMENT_NAME + " LIKE '%" + keyword + "%' OR " +
+            String query = "SELECT *, PlacementID as _id FROM " + PLACEMENT_TABLE + " WHERE " + PLACEMENT_NAME + " LIKE '%" + keyword + "%' OR " +
                     COMPANY_NAME + " LIKE '%" + keyword + "%'";
             data = db.rawQuery(query, null);
             Log.d("App", query);
@@ -196,10 +206,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return data;
     }
 
-    public Cursor getFav() { // Returns placements without preference query
+    public Cursor getFav() {
+        /**
+         * Returns placements without preference query
+          */
         SQLiteDatabase db = getWritableDatabase();
         int userID = this.getUserID();
-        String query = "SELECT *, PlacementID as _id FROM " + TABLE_NAME + " t1 WHERE EXISTS (SELECT PlacementID FROM userFavTable t2 " +
+        String query = "SELECT *, PlacementID as _id FROM " + PLACEMENT_TABLE + " t1 WHERE EXISTS (SELECT PlacementID FROM userFavTable t2 " +
                 "WHERE t1.PlacementID = t2.PlacementID AND UserID = " + userID + ")";
 
         Cursor data = db.rawQuery(query, null);
@@ -207,6 +220,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getDataPreferences(Cursor preferences) {
+        /**
+         * Returns placements based on user preferences set
+         */
         SQLiteDatabase db = getWritableDatabase();
         String query = "";
         if (preferences.moveToFirst()) {
@@ -217,7 +233,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int miles = preferences.getInt(5);
                 boolean value = preferences.getInt(6) > 0;
 
-                query = "SELECT *, PlacementID as _id FROM " + TABLE_NAME + " WHERE (" + PLACEMENT_NAME + " LIKE '%" + keyword + "%' OR " +
+                query = "SELECT *, PlacementID as _id FROM " + PLACEMENT_TABLE + " WHERE (" + PLACEMENT_NAME + " LIKE '%" + keyword + "%' OR " +
                         COMPANY_NAME + " LIKE '%" + keyword + "%') AND";
 
                 if (!paid.equals("null") && (!paid.equals("")) && (!paid.equals("Both"))) {
@@ -231,7 +247,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
                 if (value == false) {
                     if (miles >20) {
-                        miles = 20; // Set maximum miles of 20 miles commute if they dont want to commute
+                        miles = 20; // Set maximum miles of 20 miles commute if they do not want to commute
                     }
                 }
 
@@ -245,8 +261,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return data;
     }
 
-    // Check if placement is in favorites table
     public boolean checkFav(int PlacementID) {
+        /**
+         * Checks if placement is in favorites table
+         */
         SQLiteDatabase db = getWritableDatabase();
         int userID = this.getUserID();
         String query = "SELECT * FROM userFavTable WHERE UserID ="+userID + " AND PlacementID = "+PlacementID;
@@ -259,7 +277,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void addFav(int PlacementID) { // Updates favorite when heart icon clicked
+    public void addFav(int PlacementID) {
+        /**
+         * Updates favorite when heart icon clicked
+         */
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         int userID = this.getUserID();
@@ -280,6 +301,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public boolean addUser(String username) {
+        /**
+         * Adds new user to the database (Username only - more details added via profile activity)
+         */
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("USERNAME", username);
@@ -293,20 +317,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public Boolean checkUsername(String username){
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("Select * FROM profileTable WHERE username =?", new String[]{username});
-        if (cursor.getCount()>0) return false;
-        else return true;
-    }
-
-    public Boolean checkUsername2(String username){
+        /**
+         * Returns true if username already exists in database
+         */
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("Select * FROM profileTable WHERE username =?", new String[]{username});
         if (cursor.getCount()>0) return true;
         else return false;
     }
 
-    public int getUserID() { // gets the correct UserID for user logged in
+    public int getUserID() {
+        /**
+         * Gets the correct UserID for user logged in
+          */
         session = new Session(context);
         String username = session.getUsername();
         int userID = 0;
@@ -325,6 +348,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void addProfile(String name, String email, int phone, String dob, String address, String about, String experience, String university) {
+        /**
+         * Updates existing user/profile details for existing user in database
+         */
         SQLiteDatabase db = this.getWritableDatabase();
 
         int userID = this.getUserID();

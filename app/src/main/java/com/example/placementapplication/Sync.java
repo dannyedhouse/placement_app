@@ -15,7 +15,6 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.Map;
 import static com.android.volley.Request.*;
 
 public class Sync extends AppCompatActivity {
-    public static final String URL_SAVE_NAME = "http://192.168.56.1/syncDB.php";
+    public static final String URL_SAVE_NAME = "http://192.168.56.1/syncDB.php"; //local host
     private DatabaseHelper db;
     private List<Placement> placements;
     private List<Favourites> favourites;
@@ -60,7 +59,7 @@ public class Sync extends AppCompatActivity {
         return placements;
     }
 
-    private List<Favourites> loadFavourties(){
+    private List<Favourites> loadFavourites(){
         String query = "SELECT  * FROM userFavTable WHERE Sync = 0";
         SQLiteDatabase sql = db.getWritableDatabase();
         Cursor cursor = sql.rawQuery(query, null);
@@ -122,19 +121,19 @@ public class Sync extends AppCompatActivity {
         sql.execSQL(query);
     }
 
-    public void updateProfileData() { // Sets Sync to 1 after being synced to server
+    public void updateProfileData() {
         String query = "UPDATE profileTable SET Sync = 1";
         SQLiteDatabase sql = db.getWritableDatabase();
         sql.execSQL(query);
     }
 
-    public void updatePreferenceData() { // Sets Sync to 1 after being synced to server
+    public void updatePreferenceData() {
         String query = "UPDATE preferencesTable SET Sync = 1";
         SQLiteDatabase sql = db.getWritableDatabase();
         sql.execSQL(query);
     }
 
-    public void updateFavData() { // Sets Sync to 1 after being synced to server
+    public void updateFavData() {
         String query = "UPDATE userFavTable SET Sync = 1";
         SQLiteDatabase sql = db.getWritableDatabase();
         sql.execSQL(query);
@@ -182,7 +181,7 @@ public class Sync extends AppCompatActivity {
         Gson gson = new Gson();
         this.newData = gson.toJson(loadPlacements());
         this.newPreferences = gson.toJson(loadPreferences());
-        this.favouriteData = gson.toJson(loadFavourties());
+        this.favouriteData = gson.toJson(loadFavourites());
         this.newProfile = gson.toJson(loadProfile());
 
         if (checkNetwork()) {
