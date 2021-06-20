@@ -15,7 +15,6 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,8 +22,11 @@ import java.util.Map;
 
 import static com.android.volley.Request.*;
 
+/**
+ * Class to synchronise the local SQLite database and remote MySQL database.
+ */
 public class Sync extends AppCompatActivity {
-    public static final String URL_SAVE_NAME = "http://192.168.56.1/syncDB.php";
+    public static final String URL_SAVE_NAME = "http://127.0.0.1/syncDB.php"; //Replace with local IP address (e.g., 192...).
     private DatabaseHelper db;
     private List<Placement> placements;
     private List<Favourites> favourites;
@@ -60,7 +62,7 @@ public class Sync extends AppCompatActivity {
         return placements;
     }
 
-    private List<Favourites> loadFavourties(){
+    private List<Favourites> loadFavourites(){
         String query = "SELECT  * FROM userFavTable WHERE Sync = 0";
         SQLiteDatabase sql = db.getWritableDatabase();
         Cursor cursor = sql.rawQuery(query, null);
@@ -122,25 +124,28 @@ public class Sync extends AppCompatActivity {
         sql.execSQL(query);
     }
 
-    public void updateProfileData() { // Sets Sync to 1 after being synced to server
+    public void updateProfileData() {
         String query = "UPDATE profileTable SET Sync = 1";
         SQLiteDatabase sql = db.getWritableDatabase();
         sql.execSQL(query);
     }
 
-    public void updatePreferenceData() { // Sets Sync to 1 after being synced to server
+    public void updatePreferenceData() {
         String query = "UPDATE preferencesTable SET Sync = 1";
         SQLiteDatabase sql = db.getWritableDatabase();
         sql.execSQL(query);
     }
 
-    public void updateFavData() { // Sets Sync to 1 after being synced to server
+    public void updateFavData() {
         String query = "UPDATE userFavTable SET Sync = 1";
         SQLiteDatabase sql = db.getWritableDatabase();
         sql.execSQL(query);
     }
 
-    public void NewPlacementData(JSONArray data) { // Insert placements from MySQL database
+    public void NewPlacementData(JSONArray data) {
+        /**
+         * Inserts existing placement data from remote MySQL database.
+         */
 
         for (int i = 0; i<data.length(); i++) {
             JSONObject data_obj;
@@ -177,12 +182,16 @@ public class Sync extends AppCompatActivity {
     }
 
     public void saveToServer(DatabaseHelper db, Context context) {
+        /**
+         * Saves local placement data to MySQL remote database.
+         * If placement data already exists in remote database, update that locally.
+         */
         this.db = db;
         this.context = context;
         Gson gson = new Gson();
         this.newData = gson.toJson(loadPlacements());
         this.newPreferences = gson.toJson(loadPreferences());
-        this.favouriteData = gson.toJson(loadFavourties());
+        this.favouriteData = gson.toJson(loadFavourites());
         this.newProfile = gson.toJson(loadProfile());
 
         if (checkNetwork()) {
@@ -195,12 +204,12 @@ public class Sync extends AppCompatActivity {
                                 Log.d("App", response);
                                 if (msg.get("placementData").equals("success")) {
                                     updatePlacementData();
-                                } else if (msg.get("placementData").equals("success_new")) {
+                                } else if (msg.get("placementData").equals("success_new")) { // Placements exist already in
                                     JSONArray obj = new JSONArray(msg.getString("new_data"));
                                     NewPlacementData(obj);
                                     updatePlacementData();
                                 }
-                                if (msg.get("preferenceData").equals("success")){
+                                if (msg.get("preferenceData").equals("success")){ // No existing placement data in remote database
                                     updatePreferenceData();
                                 }
                                 if (msg.get("profileData").equals("success")){

@@ -58,7 +58,7 @@ public class CustomCursorAdapter extends CursorAdapter {
 
         final boolean check = db.checkFav(id); // Check if placement stored in favorites
 
-        if(check == true) {
+        if(check) {
             imageView_favorite.setImageResource(R.drawable.favorite);
         } else {
             imageView_favorite.setImageResource(R.drawable.favorite_empty);
@@ -70,7 +70,7 @@ public class CustomCursorAdapter extends CursorAdapter {
                 DatabaseHelper db = new DatabaseHelper(context);
                 SQLiteDatabase database = db.getWritableDatabase();
 
-                if (check == true) { // If placement is set as a favorite, change to not favorite when clicked
+                if (check) { // If placement is set as a favorite, change to not favorite when clicked
                     db.removeFav(id);
                     imageView_favorite.setImageResource(R.drawable.favorite_empty);
                     Toast.makeText(context, "Removed from favorites", Toast.LENGTH_SHORT).show();

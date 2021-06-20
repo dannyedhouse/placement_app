@@ -39,7 +39,7 @@ public class AccountCreationActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Field Is Empty!", Toast.LENGTH_SHORT).show();
                 }else {
                     Boolean checkUsername = db.checkUsername(username);
-                        if (checkUsername==true) {
+                        if (checkUsername==false) {
                             boolean insert = db.addUser(username);
                             if(insert==true){
                                 Toast.makeText(getApplicationContext(), "You have Registered!", Toast.LENGTH_SHORT).show();

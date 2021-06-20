@@ -39,15 +39,14 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 username = usernameInput.getText().toString();
-                Boolean checkUsername = db.checkUsername2(username);
+                Boolean checkUsername = db.checkUsername(username);
                 if(checkUsername==true) {
                     session.setUsername(username);
                     Toast.makeText(getApplicationContext(), "Successfully Logged In", Toast.LENGTH_SHORT).show();
-                startMenu();
-                }
-                    else
+                    startMenu();
+                } else {
                     Toast.makeText(getApplicationContext(), "Log In Unsuccessful", Toast.LENGTH_SHORT).show();
-
+                }
             }
         });
     }
