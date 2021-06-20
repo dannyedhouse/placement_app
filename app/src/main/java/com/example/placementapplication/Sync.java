@@ -22,8 +22,11 @@ import java.util.Map;
 
 import static com.android.volley.Request.*;
 
+/**
+ * Class to synchronise the local SQLite database and remote MySQL database.
+ */
 public class Sync extends AppCompatActivity {
-    public static final String URL_SAVE_NAME = "http://192.168.56.1/syncDB.php"; //local host
+    public static final String URL_SAVE_NAME = "http://127.0.0.1/syncDB.php"; //Replace with local IP address (e.g., 192...).
     private DatabaseHelper db;
     private List<Placement> placements;
     private List<Favourites> favourites;
@@ -139,7 +142,10 @@ public class Sync extends AppCompatActivity {
         sql.execSQL(query);
     }
 
-    public void NewPlacementData(JSONArray data) { // Insert placements from MySQL database
+    public void NewPlacementData(JSONArray data) {
+        /**
+         * Inserts existing placement data from remote MySQL database.
+         */
 
         for (int i = 0; i<data.length(); i++) {
             JSONObject data_obj;
@@ -176,6 +182,10 @@ public class Sync extends AppCompatActivity {
     }
 
     public void saveToServer(DatabaseHelper db, Context context) {
+        /**
+         * Saves local placement data to MySQL remote database.
+         * If placement data already exists in remote database, update that locally.
+         */
         this.db = db;
         this.context = context;
         Gson gson = new Gson();
@@ -194,12 +204,12 @@ public class Sync extends AppCompatActivity {
                                 Log.d("App", response);
                                 if (msg.get("placementData").equals("success")) {
                                     updatePlacementData();
-                                } else if (msg.get("placementData").equals("success_new")) {
+                                } else if (msg.get("placementData").equals("success_new")) { // Placements exist already in
                                     JSONArray obj = new JSONArray(msg.getString("new_data"));
                                     NewPlacementData(obj);
                                     updatePlacementData();
                                 }
-                                if (msg.get("preferenceData").equals("success")){
+                                if (msg.get("preferenceData").equals("success")){ // No existing placement data in remote database
                                     updatePreferenceData();
                                 }
                                 if (msg.get("profileData").equals("success")){

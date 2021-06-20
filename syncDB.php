@@ -9,24 +9,24 @@ define('DB_NAME', 'placements');
 //Connecting to the database
 $conn = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
-//checking the successful connection
+//Checking the successful connection
 if($conn->connect_error) {
 die("Connection failed: " . $conn->connect_error);
 }
 
-//making an array to store the response
+//Making an array to store the response
 $response = array();
 
 if($_SERVER['REQUEST_METHOD']=='POST'){
 
 	$received_Array = $_POST['array'];
-	$jsonArray = json_decode($received_Array, true);
+	$placementDataArray = json_decode($received_Array, true);
 
 	$query = "SELECT * FROM placementTable";
 	$result = mysqli_query($conn, $query);
 	$response["new_data"] = array();
 
-	if(mysqli_num_rows($result) >0) {
+	if(mysqli_num_rows($result) >0) { // If placements already exist in MySQL database
 		while ($row = mysqli_fetch_array($result)) {
 			$temp = array();
 			$tempDesc = array();
@@ -45,7 +45,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 			array_push($response["new_data"], $temp);
 		}
 
-		foreach ($jsonArray as $row) {
+		foreach ($placementDataArray as $row) {
 			$ID = utf8_decode($row['placementID']);
 		    $name = utf8_decode($row['placementName']);
 		    $company = utf8_decode($row['company']);
@@ -67,7 +67,7 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 		$response['placementData'] = "success_new";
 
 	} else {
-		foreach ($jsonArray as $row) {
+		foreach ($placementDataArray as $row) {
 			$ID = utf8_decode($row['placementID']);
 		    $name = utf8_decode($row['placementName']);
 		    $company = utf8_decode($row['company']);
@@ -89,41 +89,39 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 		}
 	}
 
-
-
 	$profile_Array = $_POST['user_array'];
-	$jsonArray2 = json_decode($profile_Array, true);
+	$profileDataArray = json_decode($profile_Array, true);
 
-	foreach ($jsonArray2 as $row2) {
-		$userID = utf8_decode($row2['userID']);
-	    $username = utf8_decode($row2['username']);
-	    $person_name = utf8_decode($row2['name'] ?? null);
-	    $email = utf8_decode($row2['email'] ?? null);
-	    $phone = utf8_decode($row2['number'] ?? null);
-	    $dob = utf8_decode($row2['DOB'] ?? null);
-	    $address = utf8_decode($row2['address'] ?? null);
-	    $about = utf8_decode($row2['about'] ?? null);
-	    $experience = utf8_decode($row2['experience'] ?? null);
-	    $uni = utf8_decode($row2['university'] ?? null);
+	foreach ($profileDataArray as $profile_row) {
+		$userID = utf8_decode($profile_row['userID']);
+	    $username = utf8_decode($profile_row['username']);
+	    $person_name = utf8_decode($profile_row['name'] ?? null);
+	    $email = utf8_decode($profile_row['email'] ?? null);
+	    $phone = utf8_decode($profile_row['number'] ?? null);
+	    $dob = utf8_decode($profile_row['DOB'] ?? null);
+	    $address = utf8_decode($profile_row['address'] ?? null);
+	    $about = utf8_decode($profile_row['about'] ?? null);
+	    $experience = utf8_decode($profile_row['experience'] ?? null);
+	    $uni = utf8_decode($profile_row['university'] ?? null);
 
     	
     	$stmt = mysqli_prepare($conn, "INSERT INTO profileTable (UserID, Username, Name, Email, Phone, DOB, Address, About, Experience, University) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE Username='$username', Name='$person_name', Email='$email', Phone='$phone', DOB='$dob', Address='$address', About='$about', Experience='$experience', University='$uni'");
    	 	mysqli_stmt_bind_param($stmt, 'isssisssss', $userID, $username, $person_name, $email, $phone, $dob, $address, $about, $experience,$uni);
 		mysqli_stmt_execute($stmt);
 		$response['profileData'] = "success";
-}
+	}
 
 	$pref_Array = $_POST['pref_array'];
-	$jsonArray3 = json_decode($pref_Array, true);
+	$prefDataArray = json_decode($pref_Array, true);
 
-	foreach ($jsonArray3 as $row3) {
-		$prefID = utf8_decode($row3['prefID']);
-		$userID = utf8_decode($row3['userID']);
-	    $paid = utf8_decode($row3['paid'] ?? null);
-	    $type = utf8_decode($row3['type'] ?? null);
-	    $subject = utf8_decode($row3['subject'] ?? null);
-	    $miles = utf8_decode($row3['miles'] ?? null);
-	    $relocate = utf8_decode($row3['relocate'] ?? null);
+	foreach ($refDataArray as $pref_row) {
+		$prefID = utf8_decode($pref_row['prefID']);
+		$userID = utf8_decode($pref_row['userID']);
+	    $paid = utf8_decode($pref_row['paid'] ?? null);
+	    $type = utf8_decode($pref_row['type'] ?? null);
+	    $subject = utf8_decode($pref_row['subject'] ?? null);
+	    $miles = utf8_decode($pref_row['miles'] ?? null);
+	    $relocate = utf8_decode($pref_row['relocate'] ?? null);
 
     	$stmt = mysqli_prepare($conn, "INSERT INTO preferencesTable (PrefID, UserID, Paid, Type, Subject, Miles, Relocate) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE PrefID='$prefID', UserID='$userID', Paid='$paid', Type='$type', Subject='$subject', Miles='$miles', Relocate='$relocate'");
    	 	mysqli_stmt_bind_param($stmt, 'iisssii', $prefID, $userID, $paid, $type, $subject, $miles, $relocate);
@@ -132,12 +130,12 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 	}
 
 	$fav_Array = $_POST['favourite_array'];
-	$jsonArray4 = json_decode($fav_Array, true);
+	$favDataArray = json_decode($fav_Array, true);
 
-	foreach ($jsonArray4 as $row4) {
-		$favID = utf8_decode($row4['FavID']);
-		$userID = utf8_decode($row4['UserID']);
-	    $placementID = utf8_decode($row4['PlacementID']);
+	foreach ($favDataArray as $fav_row) {
+		$favID = utf8_decode($fav_row['FavID']);
+		$userID = utf8_decode($fav_row['UserID']);
+	    $placementID = utf8_decode($fav_row['PlacementID']);
 
     	$stmt = mysqli_prepare($conn, "INSERT INTO userFavTable (FavID, UserID, PlacementID) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE FavID='$favID', UserID='$userID', PlacementID='$placementID'");
    	 	mysqli_stmt_bind_param($stmt, 'iii', $favID, $userID, $placementID);
@@ -149,5 +147,5 @@ if($_SERVER['REQUEST_METHOD']=='POST'){
 	$response['error'] = true;
 	$response['message'] = "Invalid request";
 }
-//displaying the data in json format
+//Displaying the data in json format
 echo json_encode($response);

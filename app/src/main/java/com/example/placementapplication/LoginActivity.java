@@ -43,11 +43,10 @@ public class LoginActivity extends AppCompatActivity {
                 if(checkUsername==true) {
                     session.setUsername(username);
                     Toast.makeText(getApplicationContext(), "Successfully Logged In", Toast.LENGTH_SHORT).show();
-                startMenu();
-                }
-                    else
+                    startMenu();
+                } else {
                     Toast.makeText(getApplicationContext(), "Log In Unsuccessful", Toast.LENGTH_SHORT).show();
-
+                }
             }
         });
     }
