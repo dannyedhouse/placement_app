@@ -11,6 +11,7 @@ To view the database (in Android Studio - Device File Explorer):
 *Data -> Data -> com.example.placementapplication -> databases -> placements.db*
 
 **Database structure:**
+
 ![Database design](https://i.imgur.com/PY9Mhnz.jpeg)
 
 ---
